@@ -12,8 +12,8 @@ upgrade promptly when a security release is published.
 
 ## Reporting a vulnerability
 
-Report suspected vulnerabilities privately through the GitHub Security
-Advisories workflow for `draarivpatel-ui/xmlcage`. Do not open a public issue,
+Report suspected vulnerabilities privately through the repository's
+[GitHub Security Advisory form](https://github.com/draarivpatel-ui/xmlcage/security/advisories/new). Do not open a public issue,
 pull request or discussion with a working exploit payload.
 
 Include:
@@ -62,9 +62,12 @@ Out of scope:
 
 ## Response expectations
 
-Reports are triaged as time permits. A confirmed vulnerability receives a fix
-or mitigation plan before public disclosure whenever practical. Credit is given
-in release notes only when the reporter asks for it.
+- Acknowledgment: within 48 hours.
+- Initial assessment: within 7 calendar days.
+- Fix or mitigation plan: within 30 calendar days for confirmed high-impact reports.
+- Coordinated public disclosure: up to 90 days by default, adjusted by mutual agreement when exploitation or user risk requires a different date.
+
+Credit is given in release notes only when the reporter asks for it.
 
 ## Hardening guidance
 

@@ -12,8 +12,9 @@ XInclude and stylesheet injection, external schema fetching, depth and attribute
 bombs, duplicate-attribute parser differentials and unsafe output generation.
 
 The library ships ESM, CommonJS and hand-written TypeScript definitions from
-one audited source of truth. It has zero runtime dependencies and zero
-devDependencies. The 1.0.0 deterministic suite contains exactly 748 tests.
+one audited source of truth. It has zero runtime dependencies. Its only
+development dependency is the property-test library fast-check. The 1.0.0
+deterministic suite contains exactly 748 tests.
 
 ## Publication status
 

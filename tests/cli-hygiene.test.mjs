@@ -253,13 +253,16 @@ test('repository has no local absolute paths or private email markers', () => {
   }
 });
 
-test('package metadata is npm ready and zero dependency', () => {
+test('package metadata is npm ready with zero runtime dependencies', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, 'package.json'), 'utf8'));
   assert.equal(pkg.name, 'xmlcage');
   assert.equal(pkg.version, '1.0.0');
   assert.equal(pkg.license, 'MIT');
   assert.deepEqual(pkg.dependencies, {});
-  assert.deepEqual(pkg.devDependencies, {});
+  assert.deepEqual(Object.keys(pkg.devDependencies), ['fast-check']);
+  assert.equal(typeof pkg.devDependencies['fast-check'], 'string');
+  assert.equal(pkg.devDependencies['fast-check'].startsWith('^'), false);
+  assert.equal(pkg.devDependencies['fast-check'].startsWith('~'), false);
   assert.equal(pkg.engines.node, '>=18.0.0');
   assert.equal(pkg.sideEffects, false);
   assert.equal(pkg.type, 'module');

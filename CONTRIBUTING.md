@@ -4,7 +4,7 @@ Thanks for helping improve a zero-dependency security library.
 
 ## Ground rules
 
-- Keep runtime dependencies and devDependencies empty.
+- Keep runtime dependencies empty. Keep development dependencies limited to fast-check for property fuzz tests.
 - Keep Node 18 compatibility.
 - Treat unsafe input as untrusted in every code path.
 - Fail closed. When standards behavior is ambiguous, choose the behavior that
@@ -26,7 +26,7 @@ node scripts/cli-smoke.mjs
 npm pack --dry-run
 ```
 
-The package must pack with no unexpected files and no dependency install step.
+The package must pack with no unexpected files. Consumers need no dependency install step because runtime dependencies remain empty.
 The test script intentionally uses explicit cross-platform file discovery in
 `scripts/run-tests.mjs` rather than shell glob expansion.
 
