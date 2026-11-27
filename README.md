@@ -1,5 +1,7 @@
 # xmlcage
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/draarivpatel-ui/xmlcage/badge)](https://scorecard.dev/viewer/?uri=github.com/draarivpatel-ui/xmlcage)
+
 Zero-dependency XML security parsing, auditing and generation for Node.js.
 
 `xmlcage` is a fail-closed XML 1.0 security boundary for untrusted XML. It is
