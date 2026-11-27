@@ -288,8 +288,10 @@ test('package exports cover types esm cjs and package metadata', () => {
 test('cli file is executable with a node shebang', () => {
   const content = fs.readFileSync(path.join(repoRoot, 'bin', 'xmlcage.mjs'), 'utf8');
   assert.ok(content.startsWith('#!/usr/bin/env node\n'));
-  const mode = fs.statSync(path.join(repoRoot, 'bin', 'xmlcage.mjs')).mode;
-  assert.notEqual(mode & 0o111, 0);
+  if (process.platform !== 'win32') {
+    const mode = fs.statSync(path.join(repoRoot, 'bin', 'xmlcage.mjs')).mode;
+    assert.notEqual(mode & 0o111, 0);
+  }
 });
 
 test('gitattributes enforces LF for source and documentation formats', () => {
