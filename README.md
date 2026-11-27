@@ -11,7 +11,7 @@ bombs, duplicate-attribute parser differentials and unsafe output generation.
 
 The library ships ESM, CommonJS and hand-written TypeScript definitions from
 one audited source of truth. It has zero runtime dependencies and zero
-devDependencies. The deterministic suite contains more than 500 tests.
+devDependencies. The 1.0.0 deterministic suite contains exactly 748 tests.
 
 ## Publication status
 
@@ -50,7 +50,7 @@ stylesheets and never expands custom entities.
 | DTD smuggling through mixed case, comments or a UTF BOM | CWE-611 | A pre-parse scanner recognizes declaration keywords case-insensitively and after comment removal. A leading UTF-8 BOM does not hide the prolog. |
 | XInclude SSRF or local file inclusion | CWE-918 | Elements in the XInclude namespace and prefix-obfuscated `xi:` names are rejected by default. |
 | XSLT and stylesheet injection | CWE-611 | `xml-stylesheet` and other processing instructions are rejected by default. |
-| External schema fetching through `xsi:schemaLocation` or `xsi:noNamespaceSchemaLocation` | CWE-918 | External URL, absolute-path, protocol-relative and parent-traversal schema locations are rejected by default. |
+| External schema fetching through `xsi:schemaLocation` or `xsi:noNamespaceSchemaLocation` | CWE-918 | External URL, absolute-path, protocol-relative and parent-traversal schema locations are rejected by default, including traversal or scheme text hidden with percent-encoded unreserved characters. |
 | Depth, element, attribute, text, comment and processing-instruction bombs | CWE-400 | Every resource is capped before output allocation where output is produced. The parser uses an explicit heap stack rather than recursive JavaScript calls. |
 | XML Signature Wrapping and parser differentials | CWE-347 | Strict well-formedness, exact tag matching, single-root validation, duplicate-attribute detection and namespace-resolved duplicate detection. |
 | Prototype pollution in object representations | CWE-1321 | Exact and local `__proto__`, `constructor` and `prototype` names are rejected. Attribute maps and AST nodes are null-prototype objects. |
@@ -230,9 +230,10 @@ xmlcage audit - --max-bytes 65536 --max-depth 16 < payload.xml
 ```
 
 The CLI reads `-` as standard input. Regular-file input is opened by file
-descriptor and checked with `fstat`. Directories, FIFOs, devices and other
-non-regular files are input errors. Oversized input is an unsafe finding rather
-than a silent truncation.
+descriptor and checked with `fstat`. Where the platform supports it, the open
+also uses no-follow and nonblocking flags. Directories, symlinks, FIFOs,
+devices and other non-regular files are input errors. Oversized input is an
+unsafe finding rather than a silent truncation.
 
 Exit codes:
 

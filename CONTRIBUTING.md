@@ -27,8 +27,8 @@ npm pack --dry-run
 ```
 
 The package must pack with no unexpected files and no dependency install step.
-The test script intentionally uses the explicit cross-platform test glob in
-`package.json`.
+The test script intentionally uses explicit cross-platform file discovery in
+`scripts/run-tests.mjs` rather than shell glob expansion.
 
 ## Tests
 

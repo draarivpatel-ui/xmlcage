@@ -223,6 +223,11 @@ test('cjs parses and audits equivalently', () => {
   assert.equal(cjs.parseSafeXml('<r a="1"/>').root.attributes.a, '1');
   assert.equal(cjs.auditXml('<!DOCTYPE r><r/>').findings[0].code, ERROR.DOCTYPE_FORBIDDEN);
   assert.equal(cjs.escapeXmlText('<&>'), '&lt;&amp;&gt;');
+  assert.equal(cjs.auditXml('<p:2a xmlns:p="urn:x"/>').findings[0].code, ERROR.MALFORMED_XML);
+  assert.equal(
+    cjs.auditXml('<r xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="%2e%2e/secret.xsd"/>').findings[0].code,
+    ERROR.EXTERNAL_SCHEMA_FORBIDDEN
+  );
 });
 
 test('factory exposes documented methods', () => {

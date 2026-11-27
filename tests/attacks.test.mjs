@@ -163,6 +163,23 @@ test('ordinary processing instructions can be allowed', () => {
   assert.equal(documentNode.root.children[0].data, 'data');
 });
 
+for (const xml of [
+  '<r><?pi <!DOCTYPE foo>?></r>',
+  '<?pi <!ENTITY x "y">?><r/>',
+  '<r><?pi <!ATTLIST r a CDATA #IMPLIED>?></r>'
+]) {
+  test('declaration text inside an allowed processing instruction is inert', () => {
+    const report = auditXml(xml, { allowProcessingInstructions: true });
+    assert.equal(report.safe, true, codes(report).join(','));
+  });
+}
+
+test('unterminated processing instruction hiding declaration text is still rejected', () => {
+  const report = auditXml('<r><?pi <!DOCTYPE foo></r>', { allowProcessingInstructions: true });
+  assert.equal(report.safe, false);
+  assert.ok(report.findings.some((finding) => finding.code === ERROR.MALFORMED_XML), codes(report).join(','));
+});
+
 test('xml stylesheet remains separately denied when ordinary pi is allowed', () => {
   assertReportHasCode(
     auditXml('<r><?xml-stylesheet href="x"?></r>', { allowProcessingInstructions: true }),
@@ -203,6 +220,24 @@ for (const location of schemaLocations) {
 test('schema location with entity-encoded scheme is decoded before detection', () => {
   const xml = '<r xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="&#x68;ttp://example.test/x"/>';
   assertReportHasCode(auditXml(xml), ERROR.EXTERNAL_SCHEMA_FORBIDDEN);
+});
+
+for (const [name, location] of [
+  ['percent encoded parent traversal', '%2e%2e/secret.xsd'],
+  ['mixed case percent encoded parent traversal', '%2E%2e/secret.xsd'],
+  ['single encoded dot in traversal', '.%2e/secret.xsd'],
+  ['percent encoded scheme letters', '%68%74%74%70://example.test/schema.xsd']
+]) {
+  test('schema location percent normalization rejected: ' + name, () => {
+    const xml = '<r xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="' + location + '"/>';
+    assertReportHasCode(auditXml(xml), ERROR.EXTERNAL_SCHEMA_FORBIDDEN);
+  });
+}
+
+test('reserved percent escapes in a relative schema name remain inert', () => {
+  const xml = '<r xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="schema%20file.xsd"/>';
+  const report = auditXml(xml);
+  assert.equal(report.safe, true, codes(report).join(','));
 });
 
 test('schema location through alternate prefix bound to xsi namespace is rejected', () => {

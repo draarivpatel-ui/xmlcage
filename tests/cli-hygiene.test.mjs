@@ -173,6 +173,37 @@ test('cli rejects fifo input on posix systems', { skip: process.platform === 'wi
   }
 });
 
+test('cli rejects symlink input on posix systems', { skip: process.platform === 'win32' }, () => {
+  const directory = makeTempDir();
+  try {
+    const real = path.join(directory, 'real.xml');
+    const link = path.join(directory, 'link.xml');
+    fs.writeFileSync(real, '<r/>');
+    fs.symlinkSync(real, link);
+    const result = cliResult(['audit', link]);
+    assert.equal(result.status, 2);
+    assert.equal(result.stdout, '');
+    assert.doesNotMatch(result.stderr, /at\s+/);
+  } finally {
+    cleanupTempDir(directory);
+  }
+});
+
+test('cli rejects device input on posix systems', { skip: process.platform === 'win32' }, () => {
+  const result = cliResult(['audit', '/dev/null']);
+  assert.equal(result.status, 2);
+});
+
+test('cli rejects oversized regular files before reading them', () => {
+  withTempFile('oversized.xml', '<r>xxxxx</r>', (filePath) => {
+    const result = cliResult(['audit', filePath, '--max-bytes', '8', '--json']);
+    assert.equal(result.status, 1);
+    const report = JSON.parse(result.stdout);
+    assert.equal(report.findings[0].code, 'XMLCAGE_MAX_BYTES');
+    assert.equal(report.findings[0].actual, 12);
+  });
+});
+
 test('cli stderr is empty for successful audit', () => {
   const result = cliResult(['audit', '-'], '<r/>');
   assert.equal(result.stderr, '');
@@ -233,7 +264,14 @@ test('package metadata is npm ready and zero dependency', () => {
   assert.equal(pkg.sideEffects, false);
   assert.equal(pkg.type, 'module');
   assert.equal(pkg.bin.xmlcage, 'bin/xmlcage.mjs');
-  assert.equal(pkg.scripts.test, 'node --test tests/*.test.mjs');
+  assert.equal(pkg.scripts.test, 'node scripts/run-tests.mjs');
+});
+
+test('test runner uses explicit cross platform file discovery', () => {
+  const content = fs.readFileSync(path.join(repoRoot, 'scripts', 'run-tests.mjs'), 'utf8');
+  assert.ok(content.includes('readdirSync'));
+  assert.ok(content.includes('.test.mjs'));
+  assert.ok(!content.includes('tests/*.test.mjs'));
 });
 
 test('package exports cover types esm cjs and package metadata', () => {
@@ -256,8 +294,9 @@ test('cli file is executable with a node shebang', () => {
 
 test('gitattributes enforces LF for source and documentation formats', () => {
   const content = fs.readFileSync(path.join(repoRoot, '.gitattributes'), 'utf8');
-  for (const pattern of ['*.mjs', '*.cjs', '*.js', '*.ts', '*.json', '*.md', '*.yml']) {
-    assert.match(content, new RegExp('\\*\\.' + pattern.slice(2) + ' text eol=lf'));
+  for (const pattern of ['.gitattributes', '.gitignore', 'LICENSE', '*.mjs', '*.cjs', '*.js', '*.ts', '*.json', '*.md', '*.yml']) {
+    const escaped = pattern.replace(/[.*]/g, '\\$&');
+    assert.match(content, new RegExp('^' + escaped + ' text eol=lf$', 'm'), pattern);
   }
 });
 

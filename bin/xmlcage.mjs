@@ -109,7 +109,8 @@ function readAllFromFd(fd, maxBytes) {
   const scratch = Buffer.allocUnsafe(65536);
   let total = 0;
   for (;;) {
-    const count = fs.readSync(fd, scratch, 0, scratch.length, null);
+    const wanted = Math.min(scratch.length, maxBytes - total + 1);
+    const count = fs.readSync(fd, scratch, 0, wanted, null);
     if (count === 0) break;
     total += count;
     if (total > maxBytes) {
@@ -126,14 +127,20 @@ function readInput(input, maxBytes) {
   }
   let fd = null;
   try {
-    const pathStat = fs.statSync(input);
+    const pathStat = fs.lstatSync(input);
     if (!pathStat.isFile()) {
       throw new Error('input is not a regular file');
     }
-    fd = fs.openSync(input, 'r');
+    const openFlags = fs.constants.O_RDONLY |
+      (fs.constants.O_NOFOLLOW || 0) |
+      (fs.constants.O_NONBLOCK || 0);
+    fd = fs.openSync(input, openFlags);
     const stat = fs.fstatSync(fd);
     if (!stat.isFile()) {
       throw new Error('input is not a regular file');
+    }
+    if (stat.size > maxBytes) {
+      return { oversized: true, actual: stat.size, bytes: null };
     }
     return readAllFromFd(fd, maxBytes);
   } finally {

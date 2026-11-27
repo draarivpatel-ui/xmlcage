@@ -77,7 +77,8 @@ const validSerializationCases = [
   ['text node object', { name: 'a', children: [{ type: 'text', value: '<x>' }] }, '<a>&lt;x&gt;</a>'],
   ['unicode output', { name: 'r', children: ['π 😀'] }, '<r>π 😀</r>'],
   ['attribute whitespace round trip escaping', { name: 'r', attributes: { a: 'x\ny\tz' } }, '<r a="x&#10;y&#9;z"/>'],
-  ['namespace shaped names', { name: 'x:r', attributes: { 'xmlns:x': 'urn:x', 'x:a': '1' } }, '<x:r xmlns:x="urn:x" x:a="1"/>']
+  ['namespace shaped names', { name: 'x:r', attributes: { 'xmlns:x': 'urn:x', 'x:a': '1' } }, '<x:r xmlns:x="urn:x" x:a="1"/>'],
+  ['ncname punctuation after first character', { name: 'x:r-2', attributes: { 'xmlns:x': 'urn:x', 'x:a-2': '1' } }, '<x:r-2 xmlns:x="urn:x" x:a-2="1"/>']
 ];
 
 for (const [name, input, expected] of validSerializationCases) {
@@ -134,7 +135,11 @@ const invalidSerializationCases = [
   ['digit element name', { name: '1a' }, ERROR.INVALID_INPUT],
   ['space element name', { name: 'a b' }, ERROR.INVALID_INPUT],
   ['multiple colon element name', { name: 'a:b:c' }, ERROR.INVALID_INPUT],
+  ['digit local element name after prefix', { name: 'p:2a' }, ERROR.INVALID_INPUT],
+  ['hyphen local element name after prefix', { name: 'p:-a' }, ERROR.INVALID_INPUT],
   ['digit attribute name', { name: 'r', attributes: { '1a': 'x' } }, ERROR.INVALID_INPUT],
+  ['digit local attribute name after prefix', { name: 'r', attributes: { 'p:2a': 'x' } }, ERROR.INVALID_INPUT],
+  ['digit namespace declaration prefix', { name: 'r', attributes: { 'xmlns:2p': 'urn:x' } }, ERROR.INVALID_INPUT],
   ['cdata terminator', { name: 'r', children: [{ type: 'cdata', value: 'a]]>b' }] }, ERROR.INVALID_INPUT],
   ['comment double hyphen', { name: 'r', children: [{ type: 'comment', value: 'a--b' }] }, ERROR.INVALID_INPUT],
   ['comment ending hyphen', { name: 'r', children: [{ type: 'comment', value: 'a-' }] }, ERROR.INVALID_INPUT],

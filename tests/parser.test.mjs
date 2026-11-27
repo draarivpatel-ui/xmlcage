@@ -241,6 +241,26 @@ test('same local names in different namespaces are not duplicates', () => {
   assert.equal(report.safe, true, codes(report).join(','));
 });
 
+for (const [name, xml] of [
+  ['digit after element prefix', '<p:2a xmlns:p="urn:x"/>'],
+  ['hyphen after element prefix', '<p:-a xmlns:p="urn:x"/>'],
+  ['dot after element prefix', '<p:.a xmlns:p="urn:x"/>'],
+  ['digit after attribute prefix', '<r xmlns:p="urn:x" p:2a="1"/>'],
+  ['hyphen after attribute prefix', '<r xmlns:p="urn:x" p:-a="1"/>'],
+  ['digit in declared namespace prefix', '<r xmlns:2p="urn:x"/>'],
+  ['hyphen in declared namespace prefix', '<r xmlns:-p="urn:x"/>']
+]) {
+  test('qualified name ncname boundary rejected: ' + name, () => {
+    assertReportHasCode(auditXml(xml), ERROR.MALFORMED_XML);
+  });
+}
+
+test('qualified name ncname characters after the first are accepted', () => {
+  const xml = '<p:a-2 xmlns:p="urn:x" p:b-2="1"/>';
+  const report = auditXml(xml);
+  assert.equal(report.safe, true, codes(report).join(','));
+});
+
 test('unprefixed attributes are not in the default namespace', () => {
   const documentNode = parseSafeXml('<r xmlns="urn:default" v="1"/>');
   assert.equal(documentNode.root.namespaceURI, 'urn:default');

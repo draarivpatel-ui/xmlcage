@@ -359,6 +359,15 @@ function validateQNameOrFail(name, position, options, kind) {
   if (parts === null) {
     fail(ERROR.MALFORMED_XML, 'qualified XML name is malformed', { position, name });
   }
+  if (parts.prefix !== null) {
+    const localFirst = codePointAt(parts.localName, 0);
+    if (!isXmlNameStartCodePoint(localFirst.codePoint)) {
+      fail(ERROR.MALFORMED_XML, 'qualified XML name local part has an invalid first character', {
+        position,
+        name
+      });
+    }
+  }
   if (isDangerousXmlName(name)) {
     fail(ERROR.PROTOTYPE_KEY, 'prototype pollution name rejected in XML ' + kind, {
       position,
@@ -538,6 +547,12 @@ function scanRawThreatRange(text, rangeStart, rangeEnd, options, findings, lineI
       const end = text.indexOf(']]>', position + 9);
       if (end === -1 || end + 3 > rangeEnd) return;
       position = end + 3;
+      continue;
+    }
+    if (text.startsWith('<?', position)) {
+      const end = text.indexOf('?>', position + 2);
+      if (end === -1 || end + 2 > rangeEnd) return;
+      position = end + 2;
       continue;
     }
     if (text.charCodeAt(position) === 0x3c && text.charCodeAt(position + 1) === 0x21) {
@@ -957,8 +972,25 @@ function resolveAttributeNamespaces(ctx, attributes) {
   }
 }
 
+function isUnreservedUriByte(value) {
+  return (value >= 0x41 && value <= 0x5a) ||
+    (value >= 0x61 && value <= 0x7a) ||
+    (value >= 0x30 && value <= 0x39) ||
+    value === 0x2d ||
+    value === 0x2e ||
+    value === 0x5f ||
+    value === 0x7e;
+}
+
+function normalizeSchemaUriReference(value) {
+  return value.replace(/%([0-9A-Fa-f]{2})/g, (sequence, hexadecimal) => {
+    const byte = Number.parseInt(hexadecimal, 16);
+    return isUnreservedUriByte(byte) ? String.fromCharCode(byte) : sequence;
+  });
+}
+
 function isExternalSchemaReference(value) {
-  const reference = value.trim();
+  const reference = normalizeSchemaUriReference(value.trim());
   if (reference.length === 0) return false;
   if (reference.startsWith('//') || reference.startsWith('\\\\')) return true;
   if (reference.startsWith('/') || reference.startsWith('\\')) return true;
@@ -1849,6 +1881,12 @@ function validateSerializedName(name, options, kind) {
   const parts = splitQName(name);
   if (parts === null) {
     fail(ERROR.INVALID_INPUT, 'XML ' + kind + ' qualified name is malformed', { name });
+  }
+  if (parts.prefix !== null) {
+    const localFirst = codePointAt(parts.localName, 0);
+    if (!isXmlNameStartCodePoint(localFirst.codePoint)) {
+      fail(ERROR.INVALID_INPUT, 'XML ' + kind + ' local part has an invalid first character', { name });
+    }
   }
   if (isDangerousXmlName(name)) {
     fail(ERROR.PROTOTYPE_KEY, 'prototype pollution name rejected in XML ' + kind, { name, key: name });
