@@ -1,0 +1,67 @@
+{
+  "name": "xmlcage",
+  "version": "1.0.0",
+  "description": "Zero-dependency XXE, entity-expansion, DTD, XInclude, schema SSRF and XML parser-differential defense for Node.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/draarivpatel-ui/xmlcage.git"
+  },
+  "homepage": "https://github.com/draarivpatel-ui/xmlcage#readme",
+  "bugs": {
+    "url": "https://github.com/draarivpatel-ui/xmlcage/issues"
+  },
+  "type": "module",
+  "main": "./cjs/index.cjs",
+  "module": "./src/index.mjs",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./src/index.mjs",
+      "require": "./cjs/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "xmlcage": "bin/xmlcage.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "cjs",
+    "types",
+    "docs",
+    "README.md",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build:cjs": "node scripts/build-cjs.mjs",
+    "check:cjs": "node scripts/build-cjs.mjs --check",
+    "smoke": "node scripts/cli-smoke.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "security",
+    "xml",
+    "xxe",
+    "billion-laughs",
+    "entity-expansion",
+    "cwe-611",
+    "cwe-776",
+    "xinclude",
+    "xslt",
+    "ssrf",
+    "saml",
+    "soap",
+    "zero-dependency"
+  ],
+  "license": "MIT",
+  "sideEffects": false,
+  "dependencies": {},
+  "devDependencies": {}
+}

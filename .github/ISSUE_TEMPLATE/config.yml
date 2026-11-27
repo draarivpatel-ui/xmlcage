@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/draarivpatel-ui/xmlcage/security/advisories/new
+    about: Report suspected vulnerabilities privately through a security advisory.
